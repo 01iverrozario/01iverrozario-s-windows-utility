@@ -1,8 +1,8 @@
 Clear-Host
 $ProgramName = "01iverrozario's Windows Utility"
 # $inputXML = Get-Content "MainWindow.xaml" #uncomment for development
-$inputXML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/01iverrozario/01iverrozario-s-windows-utility/main/MainWindow.xaml") 
-
+#$inputXML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/01iverrozario/01iverrozario-s-windows-utility/main/MainWindow.xaml") 
+$inputXML = (new-object Net.WebClient).DownloadString("./MainWindow.xaml") 
 $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXML
@@ -467,36 +467,36 @@ $WPFinstall.Add_Click({
                 #Start-Process powershell.exe -Verb RunAs -ArgumentList "-command winget install -e --accept-source-agreements --accept-package-agreements --silent $node | Out-Host" -Wait -WindowStyle Maximized
                 #Start-Process powershell.exe -Verb RunAs -ArgumentList "-command winget install -e --accept-source-agreements --accept-package-agreements $node | Out-Host" -Wait -WindowStyle Maximized
                 #Start-Process powershell.exe -verb runas -ArgumentList "-command winget install $node | out-host " -Wait -WindowStyle Maximized
-                start-process winget -ArgumentList -verb runas "install -e --accept-source-agreements --accept-package-agreements $node" -Wait -WindowStyle Maximized
+                start-process winget -verb runas -ArgumentList "install -e --accept-source-agreements --accept-package-agreements $node" -Wait -WindowStyle Maximized
                 $wingetResult.Add("$node`n")
-                Write-Host "================================="
-                Write-Host "---  Installs are Finished    ---"
-                Write-Host "================================="
+                #Write-Host "================================="
+                #Write-Host "---  Installs are Finished    ---"
+                #Write-Host "================================="
             }
             catch [System.InvalidOperationException] {
                 Write-Warning "Allow Yes on User Access Control to Install"
                 $Messageboxbody = "Allow Yes on User Access Control to Install"
                 $MessageIcon = [System.Windows.MessageBoxImage]::Information
-                [System.Windows.MessageBox]::Show($Messageboxbody, $ProgramName, $ButtonType, $MessageIcon)
+                #[System.Windows.MessageBox]::Show($Messageboxbody, $ProgramName, $ButtonType, $MessageIcon)
             }
-            catch {
-                Write-Error $_.Exception
-            }
+            #catch {
+            #    Write-Error $_.Exception
+            #}
         }
         $wingetResult.ToArray()
         $wingetResult | % { $_ } | Out-Host
 
         # Popup after finished
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        if ($wingetResult -ne "") {
-            $Messageboxbody = "Installed Programs `n$($wingetResult)"
-        }
-        else {
-            $Messageboxbody = "No Program(s) are installed"
-        }
-        $MessageIcon = [System.Windows.MessageBoxImage]::Information
+        #if ($wingetResult -ne "") {
+        #    $Messageboxbody = "Installed Programs `n$($wingetResult)"
+        #}
+        #else {
+        #    $Messageboxbody = "No Program(s) are installed"
+        #}
+        #$MessageIcon = [System.Windows.MessageBoxImage]::Information
 
-        [System.Windows.MessageBox]::Show($Messageboxbody, $ProgramName, $ButtonType, $MessageIcon)
+        #[System.Windows.MessageBox]::Show($Messageboxbody, $ProgramName, $ButtonType, $MessageIcon)
 
         #Write-Host "================================="
         #Write-Host "---  Installs are Finished    ---"
@@ -514,9 +514,9 @@ $WPFInstallUpgrade.Add_Click({
         catch [System.InvalidOperationException] {
             Write-Warning "Allow Yes on User Access Control to Upgrade"
         }
-        catch {
-            Write-Error $_.Exception
-        }
+        #catch {
+        #    Write-Error $_.Exception
+        #}
         $ButtonType = [System.Windows.MessageBoxButton]::OK
         $Messageboxbody = if($isUpgradeSuccess) {"Upgrade Done"} else {"Upgrade was not succesful"}
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
@@ -1265,6 +1265,7 @@ $WPFFeatureInstall.Add_Click({
         If ( $WPFFeaturewsl.IsChecked -eq $true ) {
             Enable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -All -NoRestart
+            bcdedit /set hypervisorlaunchtype auto
             Write-Host "WSL is now installed and configured. Please Reboot before using."
         }
         If ( $WPFFeaturenfs.IsChecked -eq $true ) {
@@ -1299,36 +1300,37 @@ $WPFFeatureInstall.Add_Click({
     $WPFFeatureUninstall.Add_Click({
 
         If ( $WPFFeaturesdotnet.IsChecked -eq $true ) {
-            Disable-WindowsOptionalFeature -Online -FeatureName "NetFx4-AdvSrvs" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "NetFx3" -All -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "NetFx4-AdvSrvs" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "NetFx3" -NoRestart
         }
         If ( $WPFFeatureshyperv.IsChecked -eq $true ) {
-            Disable-WindowsOptionalFeature -Online -FeatureName "HypervisorPlatform" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Tools-All" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Management-PowerShell" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Hypervisor" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Services" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Management-Clients" -All -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "HypervisorPlatform" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Tools-All" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Management-PowerShell"  -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Hypervisor"  -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Services"  -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Management-Clients" -NoRestart
             cmd /c bcdedit /set hypervisorschedulertype classic
-            Write-Host "HyperV is now installed and configured. Please Reboot before using."
+            #Write-Host "HyperV is now installed and configured. Please Reboot before using."
         } 
         If ( $WPFFeatureslegacymedia.IsChecked -eq $true ) {
-            Disable-WindowsOptionalFeature -Online -FeatureName "WindowsMediaPlayer" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "MediaPlayback" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "DirectPlay" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "LegacyComponents" -All -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "WindowsMediaPlayer" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "MediaPlayback" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "DirectPlay" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "LegacyComponents" -NoRestart
         }
         If ( $WPFFeaturewsl.IsChecked -eq $true ) {
-            Disable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -All -NoRestart
-            Write-Host "WSL is now installed and configured. Please Reboot before using."
+            Disable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart
+            #Write-Host "WSL is now installed and configured. Please Reboot before using."
+            bcdedit /set hypervisorlaunchtype off
         }
         If ( $WPFFeaturenfs.IsChecked -eq $true ) {
-            Disable-WindowsOptionalFeature -Online -FeatureName "ServicesForNFS-ClientOnly" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "ClientForNFS-Infrastructure" -All -NoRestart
-            Disable-WindowsOptionalFeature -Online -FeatureName "NFS-Administration" -All -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "ServicesForNFS-ClientOnly" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "ClientForNFS-Infrastructure" -NoRestart
+            Disable-WindowsOptionalFeature -Online -FeatureName "NFS-Administration" -NoRestart
             nfsadmin client stop
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default" -Name "AnonymousUID" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default" -Name "AnonymousGID" -Type DWord -Value 0
